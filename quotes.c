@@ -5,8 +5,9 @@ Quotes.
 
 For having a randomized quote every time you open your terminal. 
 (Put this and the file named "quotes" in the same folder as your .bashrc/configuration file.)
-
-
+Also works nicely with the package cowsay:
+	./a.out | cowsay -f turtle
+	
 USAGE
 
 	Reads quotes from a file named "quotes" in the format
@@ -51,6 +52,7 @@ int main(int argc, char ** argv)
 
 	int i;
 	int n = 0;
+
 
 	FILE * fp = fopen("quotes","r");
 	
@@ -116,7 +118,6 @@ int main(int argc, char ** argv)
 
 		while(fscanf(fp,"%c",&c)==1)
 		{
-			
 
 			if(c==quote_end[quote_end_matched])
 			{
@@ -133,18 +134,20 @@ int main(int argc, char ** argv)
 			}
 			else
 			{
+				quote_end_matched = 0;
+
 				if(strlen(buffer))
 				{
 					strapp(quotes_list[quote_id-1],buffer);
 					buffer[0] = 0;
 				}
-				else
-				{
-					char_buffer[0]=c;
-					char_buffer[1]=0;
+				
+				
+				char_buffer[0]=c;
+				char_buffer[1]=0;
 
-					strapp(quotes_list[quote_id-1],char_buffer);
-				}
+				strapp(quotes_list[quote_id-1],char_buffer);
+				
 			}
 		}
 
