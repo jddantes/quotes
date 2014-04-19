@@ -3,8 +3,8 @@ Scripts by jddantes
 
 Quotes.
 
-For having a randomized quote every time you open your terminal. (Put this in your .bashrc or similar configuration file.)
-
+For having a randomized quote every time you open your terminal. 
+(Put this and the file named "quotes" in the same folder as your .bashrc/configuration file.)
 
 
 USAGE
