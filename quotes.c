@@ -2,6 +2,22 @@
 Scripts by jddantes
 
 Quotes.
+
+Reads quotes from a file named "quotes" in the format
+	<quote number> [s#]Quote here.[e#]
+For example
+	1 [s#]Rome wasn't built in a day.[e#];
+
+USAGE
+
+
+LOG
+
+v1 
+	No randomization yet.
+
+v2 
+	Randomization added.
 */
 
 #include <stdio.h>
@@ -14,15 +30,15 @@ Quotes.
 #define quote_start_size 4
 #define quote_end_size 4
 
+#define quote_max_size 5000
+
+void strapp(char * dest, char * src);
+
 int main(int argc, char ** argv)
 {
 
-	int n = 1;
-
-	if(argc>1)
-	{
-		sscanf(argv[1],"%d",&n);
-	}
+	int i;
+	int n = 0;
 
 	FILE * fp = fopen("quotes","r");
 	
@@ -32,13 +48,23 @@ int main(int argc, char ** argv)
 		return 0;
 	}
 
-	int quote_id;
+	char ** quotes_list = 0;
+
+	int num_quotes = 0;
+	int quote_id = 0;
 	while(fscanf(fp,"%d",&quote_id)!=EOF)
 	{
-		int print = 1;
-		if(quote_id!=n)
-			print = 0;
 
+		if(quote_id -1 != num_quotes )
+		{
+			printf("%s: Quote %d out of order. Previous quote is numbered %d.\n",argv[0],num_quotes);
+			return 0;
+		}
+
+		num_quotes++;
+		quotes_list = (char **)realloc(quotes_list, sizeof(char *) * num_quotes);
+		quotes_list[num_quotes-1] = (char *)malloc(sizeof(char) * quote_max_size + 1);
+		quotes_list[num_quotes-1][0] = 0;
 
 		char c;
 
@@ -67,12 +93,15 @@ int main(int argc, char ** argv)
 		*/
 
 		/*
-			Scan and print until quote_end
+			Scan and print (or store into quotes_list) until quote_end
 		*/
 
 		int quote_end_matched = 0;
 		char buffer[quote_end_size+1];
 		buffer[0] = 0;
+
+		char char_buffer[2]="";
+
 		while(fscanf(fp,"%c",&c)==1)
 		{
 			
@@ -94,13 +123,16 @@ int main(int argc, char ** argv)
 			{
 				if(strlen(buffer))
 				{
-					if(print)
-						printf("%s",buffer);
+					strapp(quotes_list[quote_id-1],buffer);
 					buffer[0] = 0;
 				}
 				else
-					if(print)
-						printf("%c",c);
+				{
+					char_buffer[0]=c;
+					char_buffer[1]=0;
+
+					strapp(quotes_list[quote_id-1],char_buffer);
+				}
 			}
 		}
 
@@ -111,7 +143,41 @@ int main(int argc, char ** argv)
 
 	fclose(fp);
 
-	printf("\n");
+	//Print quotes_list
+	/*
+	for(i=0; i<num_quotes; i++)
+	{
+		printf("Quote %d: %s\n",i+1, quotes_list[i]);
+	}*/
+
+	if(argc>1)
+	{
+		sscanf(argv[1],"%d",&n);
+
+		if(n<1 || n>num_quotes)
+		{
+			printf("Invalid quote number.\n");
+			return 0;
+		}
+
+		n--;
+	}
+	else
+	{
+		srand(time(NULL));
+		n = rand() % num_quotes;
+	}
+
+	printf("%s\n",quotes_list[n]);
+
+	for(i=0; i<num_quotes; i++)
+		free(quotes_list[i]);
+	free(quotes_list);
 
 	return 0;
+}
+
+void strapp(char * dest, char * src)
+{
+	strcpy(dest+strlen(dest),src);
 }
