@@ -3,13 +3,22 @@ Scripts by jddantes
 
 Quotes.
 
-Reads quotes from a file named "quotes" in the format
-	<quote number> [s#]Quote here.[e#]
-For example
-	1 [s#]Rome wasn't built in a day.[e#];
+For having a randomized quote every time you open your terminal. (Put this in your .bashrc or similar configuration file.)
+
+
 
 USAGE
 
+	Reads quotes from a file named "quotes" in the format
+		<quote number> [s#]Quote here.[e#]
+	For example
+		1 [s#]Rome wasn't built in a day.[e#];
+
+	Max quote size (number of characters) is defined to be 5000.
+
+	A second command-line argument can be specified to indicate which quote number to print.
+	For example, if you want the first quote, you'd run it as (assuming the executable is a.out)
+		./a.out 1
 
 LOG
 
@@ -18,6 +27,9 @@ v1
 
 v2 
 	Randomization added.
+
+v3
+	Quote length from file checked.
 */
 
 #include <stdio.h>
@@ -145,10 +157,13 @@ int main(int argc, char ** argv)
 
 	//Print quotes_list
 	/*
+	printf("Printing quotes list...\n");
 	for(i=0; i<num_quotes; i++)
 	{
 		printf("Quote %d: %s\n",i+1, quotes_list[i]);
-	}*/
+	}
+	printf("End of list.\n");
+	*/
 
 	if(argc>1)
 	{
@@ -179,5 +194,7 @@ int main(int argc, char ** argv)
 
 void strapp(char * dest, char * src)
 {
-	strcpy(dest+strlen(dest),src);
+	int num_chars_left = quote_max_size - strlen(dest);
+	strncpy(dest+strlen(dest),src, num_chars_left);
+	*(dest+strlen(dest)+num_chars_left+1) = 0;
 }
