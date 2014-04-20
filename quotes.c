@@ -37,12 +37,15 @@ v4
 
 v5
 	Updated command-line arguments.
+
+v6 Built more checks for command-line arguments.
 */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 
 #define quote_start "[s#]"
 #define quote_end "[e#]"
@@ -59,6 +62,8 @@ v5
 
 void strapp(char * dest, char * src);
 void setarg(char * str, int * arg, int argc, char ** argv, int * valid_argc);
+int checkArg(char * str, int size, char valid_options[][3]);
+int isDigs(char * str);
 
 int main(int argc, char ** argv)
 {
@@ -75,11 +80,24 @@ int main(int argc, char ** argv)
 
 	int valid_argc = 1;
 
-	char valid_options[][3] ={"-f","-q"};
-	setarg("-f", &_f, argc, argv, &valid_argc);
-	setarg("-q", &_q, argc, argv, &valid_argc);
+	char valid_options[][3] = {"-f","-q"};
+	int * valid_options_var[] = {&_f, &_q};
 
-	printf("%d\n",valid_argc);
+	//Check if specified options are valid
+	for(i=1; i<argc; i++)
+	{
+		if(argv[i][0]=='-')
+		{
+			if( !checkArg(argv[i], sizeof(valid_options) / sizeof(valid_options[0]), valid_options) )
+			{
+				printf("quotes: Invalid option %s.\n",argv[i]);
+				return 0;
+			}
+		}
+	}
+
+	for(i=0; i<sizeof(valid_options)/sizeof(valid_options[0]); i++)
+		setarg(valid_options[i], valid_options_var[i], argc, argv, &valid_argc);
 
 	if(argc != valid_argc)
 	{
@@ -109,7 +127,7 @@ int main(int argc, char ** argv)
 	FILE * fp; 
 
 	if(_f)
-		fp = fopen(argv[2],"r");
+		fp = fopen(argv[_f+1],"r");
 	else
 		fp = fopen("quotes","r");
 	
@@ -289,4 +307,27 @@ void setarg(char * str, int * arg, int argc, char ** argv, int * valid_argc)
 			return;
 		}
 	}
+}
+
+int checkArg(char * str, int size, char valid_options[][3])
+{
+	int i;
+	for(i=0; i<size; i++)
+	{
+		if(!strcmp(str,valid_options[i]) || isDigs(str))
+			return 1;
+	}
+	return 0;
+}
+
+int isDigs(char * str)
+{
+	int i;
+	for(i=0; str[i]; i++)
+	{
+		if(isdigit(str[i]) || (str[i]=='-' && i == 0))
+			continue;
+		return 0;
+	}
+	return 1;
 }
