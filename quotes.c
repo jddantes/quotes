@@ -34,6 +34,9 @@ v3
 
 v4
 	Added more usage of command-line arguments.
+
+v5
+	Updated command-line arguments.
 */
 
 #include <stdio.h>
@@ -55,6 +58,7 @@ v4
 		return 0;
 
 void strapp(char * dest, char * src);
+void setarg(char * str, int * arg, int argc, char ** argv, int * valid_argc);
 
 int main(int argc, char ** argv)
 {
@@ -69,12 +73,21 @@ int main(int argc, char ** argv)
 	int _f = 0;
 	int _q = 0;
 
-	if(argc != 1 && argc !=3)
+	int valid_argc = 1;
+
+	char valid_options[][3] ={"-f","-q"};
+	setarg("-f", &_f, argc, argv, &valid_argc);
+	setarg("-q", &_q, argc, argv, &valid_argc);
+
+	printf("%d\n",valid_argc);
+
+	if(argc != valid_argc)
 	{
 		help_message
 	}
 
 
+	/*
 	if(argc == 3)
 	{
 		if(!strcmp(argv[1], "-f"))
@@ -90,7 +103,7 @@ int main(int argc, char ** argv)
 			printf("quotes: Unrecognized option '%s'\n",argv[1]);
 			help_message
 		}
-	}
+	}*/
 
 
 	FILE * fp; 
@@ -224,7 +237,7 @@ int main(int argc, char ** argv)
 		}
 
 		int q;
-		sscanf(argv[2],"%d",&q);
+		sscanf(argv[_q+1],"%d",&q);
 
 		if(!q)
 		{
@@ -262,4 +275,18 @@ void strapp(char * dest, char * src)
 	int num_chars_left = quote_max_size - strlen(dest);
 	strncpy(dest+strlen(dest),src, num_chars_left);
 	*(dest+strlen(dest)+num_chars_left+1) = 0;
+}
+
+void setarg(char * str, int * arg, int argc, char ** argv, int * valid_argc)
+{
+	int i;
+	for(i=1; i<argc; i++)
+	{
+		if(!strcmp(str, argv[i]) && i<argc-1)
+		{
+			*arg = i;
+			(*(valid_argc))+=2;
+			return;
+		}
+	}
 }
