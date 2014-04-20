@@ -31,6 +31,9 @@ v2
 
 v3
 	Quote length from file checked.
+
+v4
+	Added more usage of command-line arguments.
 */
 
 #include <stdio.h>
@@ -45,6 +48,12 @@ v3
 
 #define quote_max_size 5000
 
+#define help_message printf("quotes: Usage: %s <option> <parameter>\n",argv[0]);\
+		printf("Where option is one of the following:\n");\
+		printf("-f <filename> Followed by the file to open.\n");\
+		printf("-q <quote number> Followed by the quote number. Indices start at either 1 or -1. If the magnitude exceeds the number of quotes, the modulo value is used.\n");\
+		return 0;
+
 void strapp(char * dest, char * src);
 
 int main(int argc, char ** argv)
@@ -52,10 +61,47 @@ int main(int argc, char ** argv)
 
 	int i;
 	int n = 0;
+	int unordered = 0;
+
+	/*
+		Command-line arguments.
+	*/
+	int _f = 0;
+	int _q = 0;
+
+	if(argc != 1 && argc !=3)
+	{
+		help_message
+	}
 
 
-	FILE * fp = fopen("quotes","r");
+	if(argc == 3)
+	{
+		if(!strcmp(argv[1], "-f"))
+		{
+			_f = 1;
+		}
+		else if (!strcmp(argv[1], "-q"))
+		{
+			_q = 1;
+		}
+		else
+		{
+			printf("quotes: Unrecognized option '%s'\n",argv[1]);
+			help_message
+		}
+	}
+
+
+	FILE * fp; 
+
+	if(_f)
+		fp = fopen(argv[2],"r");
+	else
+		fp = fopen("quotes","r");
 	
+
+
 	if(!fp)
 	{
 		printf("Error. Could not open file.\n");
@@ -71,8 +117,10 @@ int main(int argc, char ** argv)
 
 		if(quote_id -1 != num_quotes )
 		{
-			printf("%s: Quote %d out of order. Previous quote is numbered %d.\n",argv[0],num_quotes);
-			return 0;
+			unordered = num_quotes;
+
+			//printf("%s: Quote %d out of order. Previous quote is numbered %d.\n",argv[0],num_quotes);
+			//return 0;
 		}
 
 		num_quotes++;
@@ -138,7 +186,7 @@ int main(int argc, char ** argv)
 
 				if(strlen(buffer))
 				{
-					strapp(quotes_list[quote_id-1],buffer);
+					strapp(quotes_list[num_quotes-1],buffer);
 					buffer[0] = 0;
 				}
 				
@@ -146,7 +194,7 @@ int main(int argc, char ** argv)
 				char_buffer[0]=c;
 				char_buffer[1]=0;
 
-				strapp(quotes_list[quote_id-1],char_buffer);
+				strapp(quotes_list[num_quotes-1],char_buffer);
 				
 			}
 		}
@@ -168,19 +216,33 @@ int main(int argc, char ** argv)
 	printf("End of list.\n");
 	*/
 
-	if(argc>1)
+	if(_q) //Quote id specified
 	{
-		sscanf(argv[1],"%d",&n);
-
-		if(n<1 || n>num_quotes)
+		if(unordered)
 		{
-			printf("Invalid quote number.\n");
+			printf("quotes: warning: The entry after quote %d is numbered incorrectly.\n",unordered);
+		}
+
+		int q;
+		sscanf(argv[2],"%d",&q);
+
+		if(!q)
+		{
+			printf("Indices start at either 1 or -1. If the value exceeds the number of quotes, the modulo value will be used.\n");
 			return 0;
 		}
 
-		n--;
+		if(abs(q) >  num_quotes)
+			q = q % num_quotes;
+
+		if(q>0)
+			n = q-1;
+		else
+			n = num_quotes + q;
+
+		
 	}
-	else
+	else //Produce random quote.
 	{
 		srand(time(NULL));
 		n = rand() % num_quotes;
