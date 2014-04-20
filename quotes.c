@@ -38,7 +38,8 @@ v4
 v5
 	Updated command-line arguments.
 
-v6 Built more checks for command-line arguments.
+v6
+    Built more checks for command-line arguments.
 */
 
 #include <stdio.h>
